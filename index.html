@@ -1,0 +1,432 @@
+<!doctype html>
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="description" content="Presentation Title"> <!-- TODO: Fill in title -->
+	<meta name="author" content="Full Name"> <!-- TODO: Fill in name -->
+
+	<title>Building a blockchain with Ruby</title> <!-- TODO: Fill in title -->
+	<link rel="stylesheet" href="lib/css/zenburn.css" />
+
+	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/theme/punchh-reveal.css" id="theme">
+	<!-- Printing and PDF exports -->
+	<script>
+		var link = document.createElement('link');
+		link.rel = 'stylesheet';
+		link.type = 'text/css';
+		link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
+		document.getElementsByTagName('head')[0].appendChild(link);
+	</script>
+
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section class="intro" data-background-repeat="no-repeat" data-background-size="auto auto" data-background-position="1.8em 3.2em">
+				<p><strong>Building</strong></p>
+				<p><strong>a Blockchain</strong></p>
+				<p><strong>with Ruby</strong></p>
+
+				<aside class="notes">
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<h1>Why?</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section data-background-color="#0076c0">
+				<h1>So that we may understand what a blockchain is</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section data-background-color="#0076c0">
+				<h1>independently of cryptocurrencies</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section>
+				<p>
+					Let's build a blockchain with Ruby
+				</p>
+
+				<aside class="notes">
+				</aside>
+			</section>
+
+			<section>
+				<div style="width:900px">
+					<pre style="font-size:14px">
+require "digest"    # for hash checksum digest function SHA256
+require "pp"        # for pp => pretty printer
+
+
+class Block
+
+	attr_reader :index
+	attr_reader :timestamp
+	attr_reader :data
+	attr_reader :previous_hash
+	attr_reader :hash
+
+	def initialize(index, data, previous_hash)
+		@index         = index
+		@timestamp     = Time.now
+		@data          = data
+		@previous_hash = previous_hash
+		@hash          = calc_hash
+	end
+
+	def calc_hash
+		sha = Digest::SHA256.new
+		sha.update( @index.to_s + @timestamp.to_s + @data + @previous_hash )
+		sha.hexdigest
+	end
+
+
+	def self.first( data="Genesis" )    # create genesis (big bang! first) block
+		## uses index zero (0) and arbitrary previous_hash ("0")
+		Block.new( 0, data, "0" )
+	end
+
+	def self.next( previous, data="Transaction Data..." )
+		Block.new( previous.index+1, data, previous.hash )
+	end
+
+end
+</pre>
+				</div>
+				<p style="font-size:10px">source:
+					https://github.com/openblockchains/awesome-blockchains/blob/master/blockchain.rb/blockchain.rb</p>
+			</section>
+
+			<section>
+				<div style="width:1200px">
+					<pre style="font-size:30px">
+b0 = Block.first( "Genesis" )
+b1 = Block.next( b0, "Transaction Data..." )
+b2 = Block.next( b1, "Transaction Data......" )
+b3 = Block.next( b2, "More Transaction Data..." )
+	</pre>
+				</div>
+			</section>
+
+
+
+			<section>
+				<p>We can go home now...</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h1>Not so fast.</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h1>There's a lot to talk about.</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Hashing Functions (SHA256), nonce, linked lists, proof of work, proof of stake </h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>sybil resistance, consensus (and
+					why it matters), Merkle trees and how to verify them, and more.</h2>
+				https://medium.com/@jochasinga/implementing-a-bitcoin-merkle-tree-cb0af3d53ec9
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Let's start with the basics</h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Hashing Functions</h2>
+				<p>Specifically SHA256</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<p style="font-size:30px">SHA256(" ") =>
+					0x e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<p style="font-size:30px">SHA-2 (Secure Hash Algorithm 2) is a set of cryptographic hash functions designed by the
+					United States National Security Agency (NSA).[3] They are built using the Merkle–Damgård structure, from a one-way
+					compression function itself built using the Davies–Meyer structure from a (classified) specialized block cipher.</p>
+				<p style=" font-size: 15px;">https://en.wikipedia.org/wiki/SHA-2</p>
+				<aside class="notes">
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<p style="font-size:30px">A non-vetted (please don't use this in production) SHA256 writen in Ruby with no
+					external dependencies</p>
+				<p>https://github.com/kaloos/sha256</p>
+				<aside class="notes">
+				</aside>
+			</section>
+
+
+			<section class="heading " data-background-color="#0076c0">
+				<h3>On the Secure Hash Algorithm family by Wouter Penard, Tim van Werkhoven.</h3>
+				<a style="font-size:30px;color:white" href="https://web.archive.org/web/20160330153520/http://www.staff.science.uu.nl/~werkh108/docs/study/Y5_07_08/infocry/project/Cryp08.pdf">Cryp08.pdf</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+
+			<section class="heading " data-background-color="#0076c0">
+				<h2>MORE ON THE Davies–Meyer structure</h2>
+				<p>https://en.wikipedia.org/wiki/One-way_compression_function#Davies–Meyer</p>
+				<p> see also: https://www.quora.com/What-is-an-intuitive-explanation-of-the-Davies-Meyer-hash-function</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading " data-background-color="#0076c0">
+				<h2>magic numbers in sha-256</h2>
+				<p>https://ip.rst.im/magic/sha256</p>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading " data-background-color="#0076c0">
+				<h2>The NSA is *always* above board, right?</h2>
+				<a style="color:white" target="_blank" href="https://en.wikipedia.org/wiki/Dual_EC_DRBG">https://en.wikipedia.org/wiki/Dual_EC_DRBG</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+				<p>So what's a nonce?</p>
+
+
+				<p style="font-size:20px">https://en.wikipedia.org/wiki/Cryptographic_nonce</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<p style="font-size:44px">In cryptography, a nonce is an arbitrary number that can be used just once... It is often
+					a random or pseudo-random number issued in an authentication protocol to ensure
+					that old communications cannot be reused in replay attacks. They can also be useful as initialization vectors and
+					in cryptographic hash functions. Also known as a 'Crypto Nonce'.
+
+				</p>
+				<p style="font-size:12px">https://en.wikipedia.org/wiki/Cryptographic_nonce</p>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Let's talk about consensus</h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-color="#0076c0">
+
+				<p>https://www.newgenapps.com/blog/8-blockchain-consensus-mechanisms-and-benefits</p>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Lets See a Proof of work implementation</h2>
+				<a style="color:white" href="https://blog.robertsj.com/proof-of-work/"> https://blog.robertsj.com/proof-of-work/
+				</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Let's talk about proof of stake
+				</h2>
+				<p style="font-size:20px">https://github.com/libbitcoin/libbitcoin/wiki/Proof-of-Stake-Fallacy</p>
+				<p style="font-size:20px">https://github.com/ethereum/wiki/wiki/Proof-of-Stake-FAQs#what-is-proof-of-stake</p>
+				<p style="font-size:20px">https://github.com/llSourcell/Decentralized_Rides</p>
+				https://github.com/llSourcell?utf8=✓&tab=repositories&q=decentral&type=&language=
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+
+
+
+
+
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Proof of work visualized</h2>
+				https://mastanbtc.github.io/blockchainnotes/consensustypes/
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Sybil Attack</h2>
+				<a href="			https://bitcoin.stackexchange.com/questions/50922/whats-a-sybil-attack
+						" style="color:white">
+					https://bitcoin.stackexchange.com/questions/50922/whats-a-sybil-attack
+				</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Sybil Attack</h2>
+				<a href="https://bitslog.wordpress.com/2018/06/09/leaf-node-weakness-in-bitcoin-merkle-tree-design/" style="color:white">https://bitslog.wordpress.com/2018/06/09/leaf-node-weakness-in-bitcoin-merkle-tree-design/</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+
+
+
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Merkle trees</h2>
+				<a href="https://github.com/openblockchains/merkletree.rb" style="color:white">https://github.com/openblockchains/merkletree.rb</a>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="heading" data-background-image="images/Puzzle_Blanc.jpg" data-background-color="#0076c0">
+				<h2 style="color:black">Putting it all together</h2>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+
+
+			<section class="heading" data-background-color="#0076c0">
+				<h2>Using Ethereum with Ruby</h2>
+				https://github.com/DigixGlobal/ethereum-ruby
+				<h2> shout out to: https://www.nopio.com/blog/blockchain-app-ruby/</h2>
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section class="outro" data-background-repeat="no-repeat" data-background-size="auto auto" data-background-position="1.8em 3.2em">
+				<p><strong>Thanks!</strong></p>
+				<p>Andrew McElroy</p>
+				<p>We are hiring!</p>
+
+			</section>
+			<section class="heading" data-background-color="#0076c0">
+				<h1>One More Thing</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+			<section data-background-image="images/coderetreat.png" data-background-color="#0076c0">
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<section data-background-color="#0076c0">
+				<h1>Sign up at meetup.com/punchh-tech</h1>
+
+				<aside class="notes">
+
+				</aside>
+			</section>
+
+			<footer>
+				<span style="float: right;">
+					<abbr title="Punchh">Punchh</abbr>
+				</span>
+			</footer>
+		</div>
+	</div>
+
+	<script src="lib/js/head.min.js"></script>
+	<script src="js/reveal.js"></script>
+
+	<script>
+		// More info about config & dependencies:
+		// - https://github.com/hakimel/reveal.js#configuration
+		// - https://github.com/hakimel/reveal.js#dependencies
+		Reveal.initialize({
+			width: '100%',
+			height: '100%',
+			margin: 0,
+			controls: false,
+			progress: false,
+			history: true,
+			center: true,
+			showNotes: window.location.search.match(/print-pdf/gi) ? 'separate-page' : false,
+
+			transition: 'none', // none/fade/slide/convex/concave/zoom
+			backgroundTransition: 'none',
+
+			// More info https://github.com/hakimel/reveal.js#dependencies
+			dependencies: [
+				{ src: 'lib/js/classList.js', condition: function () { return !document.body.classList; } },
+				{ src: 'plugin/notes/notes.js', async: true },
+			]
+		});
+	</script>
+</body>
+
+</html>
